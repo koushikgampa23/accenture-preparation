@@ -128,6 +128,209 @@
     110. Generate all subsets of an array.
     111. Implement Tower of Hanoi.
 
+## Important interview questions
+
+    1.Authorization and Authentication
+        Authentication
+            Authentication verifies the identity of a user.
+            The system checks whether the user is actually who they claim to be.
+        Authorization
+            Authorization determines whether an authenticated user has permission to perform a particular action or access a resource.
+
+    2.The employee having Third highest salary
+        select * from employee where salary = (select DISTINCT(salary) from employee order by salary desc limit 1 offset 2) order by salary;
+
+    3.DENSE_RANK
+        #Todo
+
+    3.1.Use where and having class to get the 3rd highest salary of each department
+        #Todo
+
+    4.What is an indexing
+        An index is a data structure that helps the database locate records faster without scanning the entire table
+        Advantages:
+            Faster data retrieval.
+            Reduces full table scans for suitable queries.
+            Improves performance of WHERE, JOIN, ORDER BY and sometimes GROUP BY operations.
+            Can improve lookup performance on frequently queried columns.
+        Disadvantages:
+            The database inserts the row into the table.
+            It updates the relevant indexes.
+            It may need to split or rebalance index pages in certain situations.
+        Where should we create indexes
+            Frequently queried columns.
+            Foreign keys used in JOINs.
+            Columns used frequently in WHERE conditions.
+            Columns used in sorting and filtering.
+
+    5. How is memory managed in python
+        Python manges memory though its memory manager, private heap, reference counting, garbage collector
+        Main concepts(5):
+            Python memory management architecture, Refernce counting, Garbage collection, Stack vs heap memory, Memory leaks
+
+        1. How Python manages memory
+            Python allocates memory dynamically when the object is created
+            Example:
+                a = [1, 2, 3], b = "hello", c = 100
+            Python allocates memory for these objects in its private heap
+            The Python memory manager is responsible for:
+                Allocating memory for objects.
+                Managing allocated memory.
+                Reusing memory when objects are no longer needed.
+                Releasing memory when possible.
+        2. Reference counting
+            Python keeps track of how many references point to an object.
+            Example:
+                a = [1, 2, 3]
+                b = a
+                c = a
+            del removes a reference, not necessarily the object itself.
+        3. Garbage Collection
+            What happens if two objects reference each other?
+            Example:
+                a = []
+                b = []
+
+                a.append(b)
+                b.append(a)
+            #a references b.
+            #b reference a.
+                del a
+                del b
+            Their reference counts are still nonzero because they reference each other.
+            This is called a reference cycle.
+            Python's cyclic garbage collector detects unreachable reference cycles and reclaims them.
+            With can intract with garbage collector using gc
+            Example:
+                import gc
+                gc.collect()
+        4. Stack memory vs Heap memory
+            Stack:
+                Stores function call frames and local execution state
+                Automatically managed as functions execute and return
+                Function calls create frames
+            Heap:
+                Stores Python objects
+                Managed by Python memory manager
+                Objects are dynamically allocated
+        5.How does Python actually allocate memory?
+            Private heap: Stores Python objects.
+            Python memory allocator: Manages memory requests.
+            pymalloc: Optimizes allocation of small objects, typically up to 512 bytes.
+            Operating system: Provides memory to the Python process.
+
+            Python may retain memory for reuse instead of immediately returning it to the operating system when an object is deleted.
+            This is why you might notice that memory usage doesn't immediately decrease even after deleting objects.
+        6. What is a memory leak in python
+            A memory leak occurs when objects that are no longer needed remain reachable, so their memory cannot be reclaimed.
+            Example:
+                data = []
+                def process():
+                    data.append("some large data")
+                for i in range(100000):
+                    process()
+            Here, the global list continuously grows because we keep adding objects and never remove them.
+            Even though Python has garbage collection, it cannot automatically remove objects that are still referenced.
+
+            How to prevent memory leaks:
+                - Avoid unnecessary global variables.
+                - Remove references to objects when no longer needed.
+                - Be careful with caches and unbounded collections.
+                - Close files and database connections using context managers.
+                - Monitor memory using tracemalloc.
+        Summary:
+            Concept - Meaning
+            Reference counting - Tracks references to objects
+            Garbage collection - Reclaims unreachable reference cycles
+            Heap               - Stores Python objects
+            Stack/frame	       - Holds function execution state
+            pymalloc	       - Efficient allocator for small objects
+            Memory leak	       - Unwanted objects remain reachable
+
+    7. Shallow copy vs deep copy:
+        Shallow copy:
+            A shallow copy creates a new outer object, but the nested objects are still shared between the original and copied objects.
+        Deep copy:
+            A deep copy creates a new outer object and recursively copies nested objects as well.
+    8. Mutable objects vs immutable objects
+        Mutable: Objects whose contents can be changed after creation.
+        Immutable: Objects whose value cannot be changed after creation.
+                    example: int, float, tuples are immutable
+        Example:
+            a=10
+            a=20
+            The original integer object 10 is not modified. Instead, the variable a is reassigned to refer to another integer object, 20.
+
+        Example2:
+            a = ([1, 2, 3], 10)
+            a[0].append(4)
+            print(a)
+
+            The tuple itself is immutable.
+            The list inside the tuple is mutable.
+            You are modifying the list, not replacing the tuple's element.
+        Example3:
+            a = (1, 2, 3)
+            a += (4,)
+            print(a)
+    8.1 Answer this questions
+        def add(item, items=[])
+            items.append(item)
+            return items
+
+        a = add(1)
+        b = add(2, [])
+        c = add(3)
+
+        print(a) #[1,3] since a still referencing to default items object
+        print(b) #[2] since i had given array then the add happens to given array
+        print(c) #[1,3] #The appending happens to default items that is referred by a and c so same value
+
+    8.2 is vs ==
+        is - Checks whether two variables refer to the exact same object in memory.
+        == - Checks whether two objects have equal values. It does not necessarily check whether their data types are identical.
+
+        Example:
+            a = True
+            b = 1
+
+            print(a==b) #True since python considers True as 1.
+            print(a is b) #False the reference of 1 and True are different
+            print(type(a) == type(b)) #False, since a is bool and b is integer
+
+        Example2:
+                l1 = [1, 2, 3]
+                l2 = list(l1)
+                print(l2 is l1) # False Here the l1 is assigned to l2 new reference created
+                print(l2 == l1) # True values are same
+
+                t1 = (1, 2, 3)
+                t2 = tuple(t1)
+                t3 = tuple(t1)
+                print(t3 is t2) # False
+                print(t3 == t2) # True
+
+                s1 = 'ABC'
+                s2 = 'ABC'
+                print(s1 is s2) # True, python internally uses string objects and assign to new same object
+
+                a = [1,2,3]
+                b = a
+                c = [1,2,3]
+
+                print(a==b) #True same values
+                print(a is b) #True same reference
+                print(a==c) #True
+                print(a is c) #False
+
+    9. Tuples vs lists
+        Python lists are dynamic arrays. They sometimes allocate extra capacity to accommodate future elements, reducing the need to resize on every append.
+        Tuples are fixed-size collections, so they don't need this dynamic resizing mechanism.
+        However:
+            Tuples are often smaller in memory than equivalent lists.
+            Tuples can be slightly faster to create and iterate over in some situations.
+            Tuples are not universally faster than lists for every operation.
+
 ## Use full git commands
 
     git init - To initialize git
@@ -492,3 +695,88 @@
         j -= 1
 
     print(arr)
+
+### Find the pair whose sum equals a target.
+
+    arr = [1, 2, 5, 4, 0, 4]
+    target = 8
+
+    a = set()
+
+    for elm in arr:
+        difference = target - elm
+        if difference in a:
+            print(elm, difference)
+            break
+        a.add(elm)
+
+    # Time complexicity - 0(n), n - len(arr), 0(1) for searching since using set
+    # Space complexicity - 0(k), distinct elements in arr
+
+### Find all pairs with a given difference.
+
+    arr = [1, 2, 5, 4, 0, 4, 6]
+    difference = 2
+
+    a = set()
+    pairs = []
+
+    for elm in arr:
+        below_pair_elm = elm - difference
+        above_pair_elm = elm + difference
+        if below_pair_elm in a:
+            pairs.append((elm, below_pair_elm))
+        if above_pair_elm in a:
+            pairs.append((elm, above_pair_elm))
+        a.add(elm)
+
+    print(pairs)
+
+### Find the maximum sum of a contiguous subarray.
+
+    arr = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+
+    max_sum = float("-inf")
+    current_sum = 0
+
+    for elm in arr:
+        current_sum += elm
+        max_sum = max(max_sum, current_sum)
+        if current_sum < 0:
+            current_sum = 0
+
+    print(max_sum)
+
+## Strings
+
+### Reverse a string.
+
+    a = "abc"
+
+    reversed_str = ""
+
+    i = len(a) - 1
+
+    while i >= 0:
+        reversed_str += a[i]
+        i -= 1
+
+    print(reversed_str)
+
+### Reverse a string.
+
+    s1 = "listen"
+    s2 = "silent"
+
+    reversed_str = ""
+
+    i = len(s2) - 1
+
+    while i >= 0:
+        reversed_str += s2[i]
+        i -= 1
+
+    if reversed_str == s1:
+        print("palindrome")
+    else:
+        print("not palindrome")
