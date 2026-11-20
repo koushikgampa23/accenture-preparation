@@ -331,6 +331,75 @@
             Tuples can be slightly faster to create and iterate over in some situations.
             Tuples are not universally faster than lists for every operation.
 
+    10. Difference class methods, static methods and instance methods
+
+        Instance methods take self as their first parameter. They can access both instance and class variables. However, assigning a value through self creates or modifies an instance attribute rather than modifying the class variable.
+
+        Class methods use the @classmethod decorator and take cls as their first parameter. They can access and modify class-level variables. We don't need to create an object to invoke them.
+
+        Static methods use the @staticmethod decorator. They don't receive either self or cls as an implicit argument. They are generally used for utility operations logically related to the class.
+
+        Code:
+        class Test:
+            company = "honda"
+
+            def __init__(self, name):
+                self.name = name
+
+            def get_info(self):
+                print(self.name, self.company)
+
+            def set_company(self, new_company):
+                self.company = new_company #Creates a new instance variable company,not modifying class attribute
+
+            @classmethod
+            def set_company_name(cls, new_company):
+                cls.company = new_company
+
+            @staticmethod
+            def calculate(a, b):
+                print(4 + 5)
+
+
+        test1 = Test("instance")
+        test1.get_info() #instance honda
+        test1.set_company("hero") #instance hero
+        test1.get_info() #instance hero
+
+        test2 = Test("instance2")
+        test2.get_info() #instance2 honda
+
+        Test("class method").set_company_name("hero")
+
+        test1.get_info() #instance1 hero
+        test2.get_info() #instance2 hero
+
+        Test("static method").calculate(4, 5) #9
+
+        Code2:
+        class Employee:
+            company = "ABC"
+
+            @classmethod
+            def update_company(cls, name):
+                cls.company = name
+
+        class Developer(Employee):
+            pass
+
+        Employee.update_company("Google")
+
+        print(Employee.company) # ABC
+        print(Developer.company) # ABC
+
+        Developer.update_company("Microsoft")
+
+        print(Employee.company) # ABC
+        print(Developer.company) # Microsoft
+
+    11. OOPS in python
+        Encapsulation, Abstraction, Polymorphism, Inheritance, class and objects
+
 ## Use full git commands
 
     git init - To initialize git
@@ -780,3 +849,597 @@
         print("palindrome")
     else:
         print("not palindrome")
+
+### Check whether a number is Armstrong.
+
+    n = 153
+
+    n = str(n)
+
+    calculated_sum = 0
+
+    power = len(n)
+
+    for char in n:
+        num = int(char)
+        calculated_sum += num**power
+
+    if calculated_sum == int(n):
+        print("Armstrong number")
+    else:
+        print("Not")
+
+    Extract numbers mathematically:
+        153 // 10 gives round off number 15.3 to 15 eliminating last digit
+        153 % 10 gives remainder that is 3
+    Code:
+        n = 153
+        temp = n
+        nums = []
+
+        while n > 0:
+            nums.append(n % 10)
+            n = n // 10
+
+        calulated_sum = 0
+        for elm in nums:
+            calulated_sum += elm ** len(nums)
+
+        if temp == calulated_sum:
+            print("Armstrong")
+        else:
+            print("no")
+
+## Interview level questions
+
+### 1.Rat and food problem
+
+    There are r rats in a locality. Each rat consumes unit amount of food.
+    You are given an array arr, where each element represents the amount of food available in a particular house.
+    Find the minimum number of houses required to provide sufficient food to all the rats.
+
+    r = 7
+    unit = 2
+    arr = [2, 8, 3, 5, 7, 4, 1, 2]
+
+
+    def rats_food(r, unit, arr):
+        food_needed = r * unit
+        cumulated_food = 0
+        houses = 0
+
+        if len(arr) == 0:
+            return -1
+
+        if food_needed == 0:
+            return 0
+
+        for elm in arr:
+            cumulated_food += elm
+            houses += 1
+            if cumulated_food >= food_needed:
+                return (cumulated_food, houses)
+        return 0
+
+
+    houses = rats_food(r, unit, arr)
+    print(houses)
+
+### 2. Number of Carries
+
+    Given two positive integers, calculate how many carry operations occur when adding them.
+
+    Code:
+        num1 = 999
+        num2 = 1
+
+        carry = 0
+        count = 0
+
+        while num1 > 0 or num2 > 0:
+            num1_digit = num1 % 10
+            num2_digit = num2 % 10
+
+            digits_sum = num1_digit + num2_digit + carry
+            carry = 0
+
+            if digits_sum // 10 > 0:
+                carry += 1
+                count += 1
+
+            num1 = num1 // 10
+            num2 = num2 // 10
+
+        print(count)
+
+### 3 Decimal to N-base Conversion
+
+    Given a decimal number num and a base n, convert the decimal number into the specified base.
+
+# Interview Questions
+
+## Celery vs asyncio
+
+    Both asyncio and Celery are used to execute tasks without blocking the main execution flow, but they solve different problems.
+
+    Asyncio - is used for concurrency within the application process. It uses an event loop to manage multiple coroutines. When one coroutine encounters an I/O-bound operation, such as an API call or database operation, it can yield control to the event loop, allowing other coroutines to execute while waiting for the result.
+
+    Celery - is a distributed task queue used for executing background jobs. We push tasks to a message broker like Redis or RabbitMQ, and separate Celery workers consume and execute those tasks independently of the web application.
+    Celery also provides task tracking through task IDs, retries, scheduling, and result management using a result backend.
+
+    For example, I would use asyncio when I need to make multiple external API calls concurrently within a request. I would use Celery for long-running operations such as sending emails, generating reports, processing files, or executing scheduled jobs.
+
+    So, the main difference is that asyncio provides concurrency within the application, whereas Celery provides distributed background task processing.
+
+### What is the difference between async and await?
+
+    async def defines a coroutine function.
+    Calling an async function creates a coroutine object.
+    await suspends the current coroutine until the awaited operation completes.
+    While waiting, the event loop can execute other scheduled tasks.
+
+### Answer the below questions
+
+    call_api1 takes 3 seconds
+    call_api2 takes 5 seconds
+
+#### Code1:
+
+    async def main():
+    response1 = await call_api1() #takes 3 seconds
+    response2 = await call_api2() # takes 5 seconds
+
+    Total time taken = 8 seconds, since await waites until we get the result
+    Key takeaway: Awaiting one coroutine before starting the next produces sequential execution.
+
+#### Code2:
+
+    import asyncio
+
+    async def main():
+        response1, response2 = await asyncio.gather(
+            call_api1(),
+            call_api2()
+        )
+
+        print(response1)
+        print(response2)
+
+    asyncio.run(main())
+
+    Takes 5 seconds, gather executes call_api1 and call_api2 concurrently and yields the results to response1 and response2
+
+    Note: Gather yields the result until all the coourtines are executed, so we cant get call_api1() at 3 seconds need to wait until response2 is also completed
+
+    If we wanted results as soon the coourtine is executed we can use create_task to schedule coorutine and get the result
+
+    asyncio.create_task() schedules a coroutine to run as an independent task on the event loop.
+    import asyncio
+
+    async def main():
+        task1 = asyncio.create_task(call_api1()) #Scheduled call_api1() in event loop
+        task2 = asyncio.create_task(call_api2()) #Scheduled call_api2() in event loop
+
+        result1 = await task1
+        result2 =  await task2
+
+        Takes 5 seconds to complete, in this approach we get result1 at 3 seconds no need to wait until we get result2
+
+#### What happens if we schedule tasks sequentially?
+
+    async def main():
+    task1 = asyncio.create_task(call_api1()) #Scheduled task1 at event loop
+
+    response1 = await task1 #Cooutine needs to yield result for response1
+
+    task2 = asyncio.create_task(call_api2())
+
+    response2 = await task2
+
+    Time taken is 8 seconds, they execute sequentially, here task is scheduled and yielded in next step
+
+    gather(): When you need all API responses together.
+    create_task(): When you need to schedule and manage tasks independently.
+    as_completed(): When you want to process results as soon as individual tasks complete.
+
+    tasks = [
+        asyncio.create_task(call_api1()),
+        asyncio.create_task(call_api2()),
+        asyncio.create_task(call_api3())
+    ]
+
+    for task in asyncio.as_completed(tasks):
+        result = await task
+        print(result)
+
+#### How do you handle exceptions in asyncio.gather()?
+
+    API 1 succeeds in 2 seconds.
+    API 2 succeeds in 3 seconds.
+    API 3 fails after 5 seconds.
+
+    By default, asyncio.gather() propagates the first exception to the caller. Other submitted awaitables aren't automatically cancelled.
+
+    Code:
+        results = await asyncio.gather(
+            call_api1(),
+            call_api2(),
+            call_api3(),
+            return_exceptions=True #Allows us to return an exception if any task raised an exception
+        )
+
+        for result in results:
+            if isinstance(result, Exception):
+                print("API failed:", result)
+            else:
+                print("API succeeded:", result)
+
+#### Implement retry logic in asyncio
+
+    Code:
+        async def call_with_retry(api, retries=3):
+            for attempt in range(retries):
+                try:
+                    return await api()
+                except TimeoutError:
+                    if attempt == retries - 1:
+                        raise
+                    await asyncio.sleep(1)
+
+        results = await asyncio.gather(
+            call_with_retry(call_api1),
+            call_with_retry(call_api2),
+            call_with_retry(call_api3),
+            return_exceptions=True
+        )
+
+### Multithreading vs Multiprocessing
+
+    Python supports both multithreading and multiprocessing.
+
+    In conventional CPython, the Global Interpreter Lock (GIL) allows only one thread at a time to execute Python bytecode within a process.
+
+    Multithreading allows us to create multiple threads within the same process. These threads share the same memory space, making communication easier. It is particularly useful for I/O-bound operations, such as making API calls, downloading files or database operations.
+
+    Multiprocessing, on the other hand, creates multiple independent processes, each with its own memory space and Python interpreter. These processes can execute simultaneously on different CPU cores, making multiprocessing suitable for CPU-intensive operations.
+
+    For example, I would use threading for downloading multiple files concurrently and multiprocessing for performing CPU-intensive calculations.
+
+    Communication:
+    Threads:
+        Shared variables, locks, queues
+    Multiprocessing:
+        Queues, pipes, shared memory
+
+#### What is a race condition and how will you mitigate
+
+    A race condition occurs when multiple threads access and modify shared mutable data concurrently, and the final result depends on the order of execution. For example, two threads can read the same counter value and both increment it, causing one update to be lost. The GIL does not guarantee protection against such race conditions. We can prevent this by using a threading lock to ensure that only one thread enters the critical section at a time.
+
+    "The main reason we use multithreading in Python is to improve the performance of I/O-bound operations, such as API calls, database queries, and file operations.
+
+    Although the GIL allows only one thread to execute Python bytecode at a time in traditional CPython, when a thread performs an I/O operation, it can release the GIL while waiting. During that time, another thread can execute.
+
+    This allows multiple I/O-bound operations to make progress concurrently and reduces overall waiting time."
+
+#### Scenario: if i wanted to make 10 external api calls
+
+    "I would prefer asyncio for making 10 external API calls because these are I/O-bound operations. Instead of creating and managing multiple OS threads, I can schedule multiple coroutines using asyncio.gather(). Whenever one coroutine waits for an API response, the event loop can switch to another coroutine. This improves resource utilization and allows concurrent execution.
+
+    However, if I'm working with an existing synchronous or blocking library that doesn't support async operations, I would consider multithreading using ThreadPoolExecutor."
+
+## Scenario based django questions
+
+### What happens when user double taps submit to register for account
+
+    A user fills out a registration form and clicks Submit.
+    Due to network latency, the user clicks Submit again because they think the first click didn't work.
+    As a result, Django receives two POST requests almost simultaneously.
+
+    "When a user submits the registration form multiple times, I would use Django's get_or_create() along with a database-level unique constraint on the email field.
+
+    The unique constraint guarantees that duplicate records cannot be inserted, even if multiple requests arrive simultaneously.
+
+    If the first request creates the user, the second request retrieves the existing user. If both requests initially check before insertion, Django handles the uniqueness conflict and retries the lookup."
+
+### How to prevent double payments for user
+
+    To prevent double payments, I would implement an idempotent payment architecture.
+
+    First, whenever the user initiates a payment, I generate a unique idempotency key for that payment attempt and store it in PostgreSQL with a unique constraint.
+
+    Whenever the frontend sends a payment request, Django checks whether that idempotency key already exists. If it does, I return the existing payment attempt instead of initiating another payment.
+
+    For a new payment attempt, Django creates an order with the payment gateway and stores the gateway order ID.
+
+    After the user completes the payment, I verify the transaction status with the payment gateway and update my local payment record.
+
+    Now, consider a network timeout. The payment gateway might have successfully deducted the amount, but Django may not have received the response. In that situation, I wouldn't immediately mark the payment as failed. I would maintain the payment status as PENDING or UNKNOWN and verify it with the payment gateway.
+
+    For payments that remain unresolved, I would use Celery background tasks with exponential backoff to periodically reconcile the payment status. I would also implement payment gateway webhooks to receive status updates.
+
+    Once I receive a confirmed SUCCESS or FAILED status, I update the database accordingly. If the payment remains unresolved, I keep it pending and escalate it rather than incorrectly marking it as failed.
+
+    Finally, I would ensure that payment processing and order fulfilment are idempotent so that duplicate requests or duplicate webhooks never result in duplicate charges or duplicate order fulfilment.
+
+    "I would use transaction.atomic() with select_for_update() to lock the order row while checking and creating a payment attempt. This ensures concurrent requests for the same order are serialized. Additionally, I would enforce a database-level unique constraint to prevent multiple active payment attempts for the same order. Together, these mechanisms protect against duplicate payment initiation."
+
+### Two users try to book the same movie seat at exactly the same time. How would you prevent both users from booking it?
+
+    "I would use PostgreSQL transactions and select_for_update() to prevent concurrent users from acquiring the same seat.
+
+    When a user requests a seat, I would lock the seat row, check its availability, and change its status from AVAILABLE to HELD. I would also store a hold expiry timestamp, such as five minutes.
+
+    I would commit the transaction immediately and release the database lock. Payment would happen outside the transaction.
+
+    Once payment is verified, I would start another transaction, lock the seat, validate the hold, and update it to CONFIRMED.
+
+    If payment definitively fails or the hold expires, I would release the seat using a background Celery task. For uncertain payment outcomes, I would first verify the gateway status.
+
+    I would also enforce a database constraint to prevent duplicate confirmed bookings."
+
+### If a api takes 8-10 seconds how would you optimize it
+
+    "If a Django API takes 8–10 seconds, I would first measure where the time is being spent rather than immediately optimizing the database.
+
+    I would measure the total API execution time using time.perf_counter() and inspect database query count and execution time.
+
+    I would check for N+1 queries and optimize ORM access using select_related() and prefetch_related().
+
+    Next, I would inspect slow SQL queries using PostgreSQL's EXPLAIN ANALYZE and add appropriate indexes where necessary.
+
+    If database queries aren't the bottleneck, I would profile Python application logic and check external API calls or other blocking operations.
+
+    Finally, I would consider Redis caching, pagination, and reducing unnecessary response data. After each change, I would benchmark again to verify the improvement."
+
+## Celery based questions
+
+    i use @shared_task to register the function as celery task object.
+    It makes the task available to Celery's task registration mechanism.
+    It allows the task to be discovered and executed by Celery workers.
+
+    1.Why shared_task instead of app.task?
+    shared_task is useful in Django applications because it avoids directly coupling individual Django apps to a particular Celery application instance.
+
+    2.what happens when we call a celery task using .delay()
+        1.Django calls .delay()
+            .delay() is a shortcut for .apply_async().
+        2.Celery prepares a task message
+            Task name
+            Task ID (UUID)
+            Arguments and keyword arguments
+            Relevant execution options
+        3.Message is published to the broker
+            Celery's messaging layer (Kombu) communicates with Redis or RabbitMQ and publishes the message to the configured queue.
+        4.Celery worker consumes the message
+            The worker listens to its configured queues and receives the task message.
+        5.Worker executes the task
+            It identifies the registered task by its name and executes the corresponding function with the supplied arguments.
+        6.Task state/result is stored
+            If a result backend is configured, Celery can store the task state and result. Django can retrieve it using the returned task ID.
+
+    3.Difference between .delay() and .apply_async()
+        send_email.delay("user@gmail.com")
+        send_email.apply_async(
+            args=["user@gmail.com"],
+            countdown=60,
+            queue="email_queue"
+        )
+
+        Feature	delay()	apply_async()
+        Arguments	Yes	Yes
+        Custom queue	No	Yes
+        Countdown	No	Yes
+        ETA	No	Yes
+        Execution options	Limited	Extensive
+    Essentially, .delay() is a convenient shortcut for .apply_async().
+
+    Important Note:
+    the Django application and Celery worker share the same application code and task definitions, but they run as separate processes/containers.
+    The worker must be configured with the same broker connection and must discover the tasks it needs to execute.
+    Also, depends_on controls startup order, not necessarily service readiness.
+
+    4. Full defination of celery
+        "Celery is a distributed task queue used to execute background tasks asynchronously.
+
+        It consists of four major components: producer, message broker, Celery worker, and result backend.
+
+        The producer can be a Django or FastAPI application. When the application triggers a Celery task using .delay() or .apply_async(), Celery serializes the task information and publishes it to the message broker, such as Redis or RabbitMQ.
+
+        The Celery worker continuously listens to the configured queues, consumes the task messages, and executes the corresponding registered task functions.
+
+        Once execution is completed, the task status and result can be stored in the result backend, such as Redis or PostgreSQL, allowing the application to retrieve the result using the task ID.
+
+        This architecture helps us offload time-consuming operations like sending emails, generating reports, and processing files from the main HTTP request-response cycle."
+
+    5. Redis as message broker and result backend
+        Redis as Broker	                Redis as Result Backend
+        Stores pending task messages	Stores task execution states/results
+        Workers consume messages	    Application retrieves results
+        Used for task distribution	    Used for result tracking
+        Queue-oriented	                Task-ID-oriented
+
+### A Celery worker picks up a task, executes it successfully, but crashes before acknowledging the message.
+
+    By default, Celery uses early acknowledgement (acks_late=False).
+    Celery flow:
+        Worker receives the task.
+        Worker acknowledges the message to Redis/RabbitMQ.
+        Worker executes the task.
+        If the worker crashes during execution, the broker has already received the acknowledgement.
+    In this case, the task might be lost because the broker considers it acknowledged.
+
+    Code:
+    @shared_task(acks_late=True)
+    def process_payment(payment_id):
+        # Process payment
+        pass
+
+    Prevent this:
+    acks_late=True
+    Celery flow:
+        Worker receives the task.
+        Worker executes the task.
+        If execution succeeds, the worker acknowledges the message.
+        If the worker crashes before acknowledgement, the broker may redeliver the message.
+
+    This means the same task can execute more than once.
+
+Real world example:
+Imagine a payment-processing task: - Worker processes payment successfully. - Worker crashes before acknowledging the message. - Broker redelivers the message. - Another worker receives the same payment task.
+Now you might process the payment twice!
+
+    Therefore, even with acks_late=True, you need idempotency to prevent duplicate processing.
+
+    For example, use a unique payment ID and a database constraint or transaction to ensure that a payment is processed only once.
+
+### How would you design your Django application to ensure that the same task doesn't produce duplicate side effects?
+
+    "When we configure late acknowledgement in Celery, a task can be redelivered if a worker crashes before acknowledging it. This can result in duplicate task execution.
+
+    To prevent duplicate business operations, I would implement idempotency in the application layer. For example, for payment processing, I would generate a unique idempotency key for each payment and maintain its processing status in the database.
+
+    Whenever a worker receives a task, it checks whether the payment has already been successfully processed. If it has, the worker skips the operation. Otherwise, it proceeds with processing.
+
+    I would also use database transactions, appropriate locking and the payment gateway's idempotency mechanism to handle concurrent execution safely."
+
+#### E commerce application
+
+    Whenever a customer places an order:
+        1. Save the order in PostgreSQL.
+        2. Send an order confirmation email.
+        3. Generate an invoice PDF.
+        4. Send an SMS notification.
+
+    Would you execute all these operations inside the Django API request, or would you offload some operations to Celery?
+
+    Django transaction.on_commit()
+    Django provides a mechanism to execute callbacks only after a database transaction successfully commits.
+
+    Code:
+        from django.db import transaction
+
+        with transaction.atomic():
+
+            order = Order.objects.create(
+                user=user,
+                total_amount=1000
+            )
+
+            transaction.on_commit(
+                lambda: send_email.delay(order.id)
+            )
+
+            transaction.on_commit(
+                lambda: generate_invoice.delay(order.id)
+            )
+
+            transaction.on_commit(
+                lambda: send_sms.delay(order.id)
+            )
+
+    We can trigger a celery task only after the order is commited to order table.
+
+    Next question:
+    Suppose:
+        - PostgreSQL successfully saves the order.
+        - transaction.on_commit() executes.
+        - Redis is temporarily unavailable.
+        - Celery cannot publish the email, invoice and SMS tasks.
+    How would you ensure that these tasks are not permanently lost?
+        Transactional Outbox Pattern
+        Instead of directly publishing tasks to Redis after committing the order, we save an event in a separate PostgreSQL table within
+
+        The same transaction.
+        order_id	status
+        101	CREATED
+
+        Outbox table
+        event_id	event_type	status
+        1	SEND_EMAIL	PENDING
+        2	GENERATE_INVOICE	PENDING
+        3	SEND_SMS	PENDING
+
+        Now we have another background process called an Outbox Publisher.
+
+        Its responsibility:
+        1. Periodically fetch pending events from PostgreSQL.
+        2. Publish them to Redis.
+        3. If publishing succeeds, mark the event as published.
+        4. If Redis is unavailable, retain the event as pending and retry later.
+
+        One additional production consideration: if the publisher crashes after successfully publishing an event but before marking it as published, it might publish the same event again. Therefore, consumers must be idempotent.
+
+    Interview ready:
+        "I would implement the Transactional Outbox Pattern to ensure reliable background task publishing.
+
+        Instead of directly publishing Celery tasks after the database transaction commits, I would save the order and corresponding events in an Outbox table within the same database transaction.
+
+        A separate publisher process would periodically fetch pending events and publish them to Redis. If Redis is unavailable, the events remain pending and can be retried later.
+
+        I would also implement idempotency because the same event might be published more than once."
+
+### What is the difference between increasing concurrency and increasing the number of worker containers?
+
+    Concurrency means the number of tasks a Celery worker can execute simultaneously.
+    Celery can use:
+        - Multiprocessing (prefork), commonly the default.
+        - Threads.
+        - Eventlet or gevent.
+        - Solo (one task at a time).
+    4 workers with 4 concurrency give 4*4 = 16 tasks are simentanously happening in celery
+
+    Concurrency	                                    Horizontal scaling
+    Increases execution slots per worker	        Increases worker instances
+    Can increase CPU/memory pressure	            Distributes workload across instances
+    Configured using --concurrency	                Achieved by adding worker containers/instances
+    Vertical scaling within worker configuration	Horizontal scaling
+
+### How would you prioritize tasks in celery
+
+    "I would implement separate queues using Celery task routing. Payment-related tasks would be routed to a dedicated payment queue, while report-generation tasks would go to a separate reporting queue.
+
+    I would configure dedicated Celery workers for each queue so that long-running reporting tasks cannot block critical payment-related tasks.
+
+    Additionally, Celery supports task-level priorities through apply_async, but I would prefer queue separation for workload isolation."
+
+### How do you cancel a task in celery
+
+    Case 1: Task is still waiting in the queue
+            Use revoke()
+            Celery broadcasts a revoke message to workers. When a worker encounters that task, it skips execution.
+
+        Code:
+        from celery.result import AsyncResult
+
+        task = AsyncResult(task_id)
+        task.revoke()
+
+    Case 2: Task is already executing
+            task.revoke(terminate=True)
+            This terminates the worker process executing that particular task, not necessarily the entire Celery worker or all its concurrent tasks.
+
+            However, killing a worker process can have side effects depending on the execution pool and worker configuration. That's why it isn't recommended as normal application-level cancellation.
+
+    Recommended for case2:
+    Consider iam generating excel file with 1 million records and the processing is 6,00,000 lakhs
+        Code:
+        @shared_task(bind=True)
+        def generate_excel(self, user_id):
+
+            chunk_size = 5000
+
+            for offset in range(0, 1000000, chunk_size):
+
+                cancelled = redis_client.get(
+                    f"cancel:{self.request.id}"
+                )
+
+                if cancelled:
+                    return "Task cancelled"
+
+                records = fetch_records(offset, chunk_size)
+
+                process_records(records)
+
+            return "Excel generated successfully"
+    Before every chunk processing check is the task cancelled or not by using cancel:task_id
