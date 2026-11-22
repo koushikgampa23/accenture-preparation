@@ -130,6 +130,67 @@
 
 ## Important interview questions
 
+    0. Flattening question:
+    Question:
+        nested = {
+            "user": {"name": "John", "age": 30, "add": "US"},
+            "items": [1, {"id": {"name": "koushik"}}, 3, {"id": 19}],
+        }
+    Result:
+    [('user.name', 'John'), ('user.age', 30), ('user.add', 'US'), ('items.1.id', 42), ('items.3.id', 19)]
+
+    Code:
+        def flattening(nested, result, key_history=""):
+            if isinstance(nested, dict):
+                for key, value in nested.items():
+                    new_key = f"{key_history}.{key}" if key_history else key
+                    flattening(value, result, new_key)
+
+            elif isinstance(nested, list):
+                for index, value in enumerate(nested):
+                    new_key = f"{key_history}.{index}" if key_history else str(index)
+                    flattening(value, result, new_key)
+
+            else:
+                # base case: int, str, etc.
+                result.append((key_history, nested))
+
+            return result
+
+        print(flattening(nested, []))
+
+    My way:
+        # Flattening question
+        nested = {
+            "user": {"name": "John", "age": 30, "add": "US"},
+            "items": [1, {"id": 42}, 3, {"id": 19}],
+        }
+
+
+        def flattening(nested, result, key_history):
+            if isinstance(nested, dict):
+                for key, value in nested.items():
+                    new_key = key_history + "." + key if key_history else key
+                    if isinstance(value, int) or isinstance(value, str):
+                        result.append((new_key, value))
+                    else:
+                        flattening(
+                            value, result, new_key
+                        )  # Since value is dict recurssion to extract key_history
+            if isinstance(nested, list):
+                for index in range(len(nested)):
+                    nested_elm = nested[index]
+                    if isinstance(nested_elm, int) or isinstance(nested_elm, str):
+                        pass
+                    else:
+                        new_key = key_history + "." + str(index)
+                        flattening(nested_elm, result, new_key)
+            return result
+
+
+        result = flattening(nested, [], "")
+        print(result)
+
     1.Authorization and Authentication
         Authentication
             Authentication verifies the identity of a user.

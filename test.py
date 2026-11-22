@@ -1,26 +1,31 @@
-### Rotate an array left by K positions.
+# Flattening question
 
-arr = [1, 2, 3, 4]
-k = 3
+nested = {
+    "user": {"name": "John", "age": 30, "add": "US"},
+    "items": [1, {"id": 42}, 3, {"id": 19}],
+}
 
-# reverse first k elements
 
-i = 0
-j = k - 1
+def flattening(nested, result, key_history):
+    if isinstance(nested, dict):
+        for key, value in nested.items():
+            new_key = key_history + "." + key if key_history else key
+            if isinstance(value, int) or isinstance(value, str):
+                result.append((new_key, value))
+            else:
+                flattening(
+                    value, result, new_key
+                )  # Since value is dict recurssion to extract key_history
+    if isinstance(nested, list):
+        for index in range(len(nested)):
+            nested_elm = nested[index]
+            if isinstance(nested_elm, int) or isinstance(nested_elm, str):
+                pass
+            else:
+                new_key = key_history + "." + str(index)
+                flattening(nested_elm, result, new_key)
+    return result
 
-while i < j:
-    arr[i], arr[j] = arr[j], arr[i]
-    i += 1
-    j -= 1
 
-# reverse entire array
-
-i = 0
-j = len(arr) - 1
-
-while i < j:
-    arr[i], arr[j] = arr[j], arr[i]
-    i += 1
-    j -= 1
-
-print(arr)
+result = flattening(nested, [], "")
+print(result)
